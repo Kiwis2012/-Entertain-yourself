@@ -1,4 +1,13 @@
-''' whale '''
+'''
+
+    humpback whale identification
+
+    https://www.kaggle.com/c/humpback-whale-identification/overview
+
+    still working
+    the basic code was from
+    no use of CUDA, performs better if pre-trained models loaded
+'''
 import pandas as pd
 import os
 import matplotlib.pyplot as plt
