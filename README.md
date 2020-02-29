@@ -1,6 +1,8 @@
-#Entertain yourself
+# Entertain yourself
 
-'24points.py'
+
+`24points.py`
+
 A game of 24 points == Still very humble
 
 
