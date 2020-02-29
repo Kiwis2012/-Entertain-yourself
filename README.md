@@ -1,3 +1,10 @@
+#Entertain yourself
+
+'24points.py'
+A game of 24 points == Still very humble
+
+
+
 # ForPatternRecognition
 Assignments for class PatternRecognition in SEP2019
 
