@@ -1,6 +1,7 @@
-# Entertain yourself
+# ForAdvancedProgramDesign
+Another course now...
 
-
+`lib_manage.py`
 
 # ForPatternRecognition
 Assignments for class PatternRecognition in SEP2019
