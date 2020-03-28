@@ -1,19 +1,21 @@
+# -*- coding:utf-8 -*-
 '''
     图书管理系统
     碎碎念见最下方
+    打包命令,切记要把exe放进csv在的文件夹...
+    pyinstaller -F D:\Kiwi\Code\Assignments\library_management\lib_manage.py --noconsole
 '''
 import random
 import string
 import time
 import requests
 import csv
-import sys
-import pandas as pd
-# import pymysql
+import re
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 from bs4 import BeautifulSoup
+
 from collections import Iterable
 
 # 好像明文储存有点过分不安全了...干脆不检测密码了
@@ -23,19 +25,13 @@ BOOK_IMPORT_PATH = 'data\databook.csv'
 BOOK_STORAGE_PATH = 'data\databook.csv'
 LOGIN_PWD = 'PWD'
 MAX_USR = 20
-data_columns = ['书籍名称', '可借复本', '馆藏复本', '作者或译者', '地址'] # 好像没用上
-
-# ['书籍名称', '索书号', '可借复本', '馆藏复本', '作者或译者', '地址']
+# data_columns = ['书籍名称', '可借复本', '馆藏复本', '作者或译者', '地址']  # 好像没用上
 
 class usr:
-    def __init__(self, name):
+    def __init__(self, id, name):
         self.name = name
+        self.id = id
         self.__pwd = LOGIN_PWD
-    def print_usr(self, str):
-        print('用户详情:\n    用户名:', self.nm, '\n'+str)
-    def show_all(self):
-        # lib.lib_dis_book()
-        pass
 
 class book:
     def __init__(self, name=None, id=None, avaliable=None, all=None, author=None, addr=None):
@@ -67,7 +63,7 @@ class book:
 
 class rd(usr):
     def __init__(self, id, name, *history):
-        super().__init__(name)
+        super().__init__(id, name)
         self.id = id
         self.type = 'Reader'
         self.b_book = []
@@ -106,9 +102,7 @@ class rd(usr):
 
 class admin(usr):
     def __init__(self, id, name):
-        super().__init__(name)
-        self.id = id
-        self.name = name
+        super().__init__(id, name)
         self.type = 'Admin'
         # self.hstry = history
 
@@ -188,53 +182,97 @@ class main_page:
         self.left_down_frm = tk.Frame(width=200, height=300)
         self.left_down_frm.grid(row=1, column=0, sticky='NW', padx=40, pady=10)
         self.right_frm = tk.Frame(width=600, height=600)
-        self.right_frm.grid(row=0, column=1, rowspan=2, sticky='NW', padx=20, pady=20)
-
+        self.right_frm.grid(row=0, column=1, rowspan=2, sticky='NW', padx=20, pady=10)
+        # 左上的部件
         self.welc_msg = tk.Label(self.left_top_frm, text="欢迎回来!", font=('Verdana', 12))\
             .grid(row=0, column=1, ipady=5, sticky='w')
         self.time = tk.Label(self.left_top_frm, text=time.strftime('%y-%m-%d %I:%M:%S %p'), font=('Verdana', 12))
         self.time.grid(row=1, column=1, ipady=5, sticky='w')
-        self.usr_info = tk.Label(self.left_top_frm, text="用户信息", font=('Verdana', 12))\
+        self.usr_info = tk.Label(self.left_top_frm, text="用户ID: %s" % self.usr_class.id, font=('Verdana', 12))\
             .grid(row=2, column=1, ipady=5, sticky='w')
         self.usr_name = tk.Label(self.left_top_frm, text="用户名:%s" % self.usr_name, font=('Verdana', 12))\
             .grid(row=3, column=1, ipady=5, sticky='w')
         self.usr_type = tk.Label(self.left_top_frm, text="用户类型:管理员", font=('Verdana', 12))
         self.usr_type.grid(row=4, column=1, ipady=5, sticky='w')
-
+        # 左下角部件
+        self.find = tk.Entry(self.left_down_frm, width=20, fg='gray')
+        self.find.insert(index=0, string='请输入查找内容')
+        self.find.bind('<Button-1>', func=self.find_book)
+        self.find.bind('<Return>', func=self.dis_res)
+        self.find.grid(row=0, column=1, pady=5)
         self.b1 = tk.Button(self.left_down_frm, text='', width=20, command=None)
-        self.b1.grid(row=0, column=1, pady=5)
+        self.b1.grid(row=1, column=1, pady=5)
         self.b2 = tk.Button(self.left_down_frm, text='', width=20, command=None)
-        self.b2.grid(row=1, column=1, pady=5)
+        self.b2.grid(row=2, column=1, pady=5)
         self.b3 = tk.Button(self.left_down_frm, text='', width=20, command=None)
-        self.b3.grid(row=2, column=1, pady=5)
+        self.b3.grid(row=3, column=1, pady=5)
         self.b4 = tk.Button(self.left_down_frm, text='', width=20, command=None)
-        self.b4.grid(row=3, column=1, pady=5)
-        self.exit = tk.Button(self.left_down_frm, text='退出', width=20, command=lambda: self.usr_exit(self.usr_class)) \
-            .grid(row=4, column=1, pady=5)
-
+        self.b4.grid(row=4, column=1, pady=5)
+        self.exit = tk.Button(self.left_down_frm, text='退出', width=20, command=lambda: self.usr_exit(self.usr_class))
+        self.exit.grid(row=5, column=1, pady=5)
+        # 右侧的treeview
         self.columns = ('书籍名称', '索书号', '可借复本', '馆藏复本', '作者或译者', '地址')
-        self.book_list = ttk.Treeview(self.right_frm, show='headings', height=18, columns=self.columns)
+        self.book_list = ttk.Treeview(self.right_frm, show='headings', height=20, columns=self.columns)
+        # self.book_list.bind('<Double-Button-1>', self.find_book)
         self.scroll = ttk.Scrollbar(self.right_frm, orient='vertical', command=self.book_list.yview)
         self.book_list.configure(yscrollcommand=self.scroll.set)
-
+        # 这里只是用来设定宽度
         self.book_list.column('书籍名称', width=120, anchor='center')
         self.book_list.column('索书号', width=100, anchor='center')
         self.book_list.column('可借复本', width=50, anchor='center')
         self.book_list.column('馆藏复本', width=50, anchor='center')
         self.book_list.column('作者或译者', width=150, anchor='center')
         self.book_list.column('地址', width=200, anchor='center')
-        # self.book_list.bind('<Double-Button-1>', self.edit_book())
         self.book_list.grid(row=0, column=0, sticky='NSEW')
         self.scroll.grid(row=0, column=1, sticky='NS')
-
+        # 绑定headings
         for i in self.columns:
             self.book_list.heading(i, text=i)
+        # self.main.bind('<Button-1>', func=self.dis_res)
         self.update_time()
-
 
     def update_time(self):
         self.time.configure(text=time.strftime('%y-%m-%d %I:%M:%S %p'))
         self.time.after(ms=1000, func=self.update_time)
+
+    def find_book(self, event):
+        self.find.delete(0, len(self.find.get()))
+        self.find.configure(fg='black')
+        self.find.bind('<FocusOut>', func=self.dis_res)
+
+    def dis_res(self, event):
+        # 没找到暂时没有提醒
+        self.target = self.find.get()
+        # print(self.book_list.selection())
+        for each_selected in self.book_list.selection():
+            self.book_list.selection_remove(each_selected)
+        for each_col in self.book_list.get_children():
+            for each_cell in self.book_list.item(each_col, 'values'):
+                if self.target is not '' and self.target in each_cell:
+                    self.book_list.selection_add((each_col))
+                    self.book_list.move(each_col, '', 0)
+
+
+
+    # def find_pop(self, event):
+    #     try:
+    #         self.find_entry
+    #     except NameError:
+    #         print('test')
+    #     else:
+    #         self.find_entry.destroy()
+    #     finally:
+    #         self.row = self.book_list.identify_row(event.y)
+    #         self.col = self.book_list.identify_column(event.x)
+    #         x, y, width, height = self.book_list.bbox(self.row, self.col)
+    #         print(self.row, self.col)
+    #         print(self.book_list.bbox(self.row, self.col))
+    #         self.find_entry = tk.Entry(self.book_list, '', width=width//4)
+    #         self.find_entry.place(x=x, y=y)
+        # print(self.book_list.heading(column=self.col)['text'])
+        # if self.book_list.identify_region(x=event.x, y=event.y) == 'heading':
+        #     pass
+        # print(self.book_list.identify_region(x=event.x, y=event.y))
 
     def usr_exit(self, usr_class):
 
@@ -313,23 +351,18 @@ class rd_page(main_page):
             print(usr_class.hstry[1:])
         else:
             messagebox.showinfo(message='未查询到借阅记录')
-        # if len(usr_class.hstry) > 1:
-        #     # print(len(usr_class.hstry), usr_class.hstry[-1].name, 'return', usr_class.hstry[-1].time)
-        #     for each_history in usr_class.hstry[1:]:
-        #         # print(each_history.book)
-        #         if each_history.name == book.nm and each_history.operate == 'lend':
-        #             # print('match succeed', each_history.name)
-        #             self.book_list.set(self.book_list.selection(), 2, str(int(book.ava)+1))
-        #             usr_class.opr(book, 'return')
-        #             messagebox.showinfo(message='归还成功!\n 共计借书时间%f分钟'%((usr_class.hstry[-1].time-each_history.time)/60))
-        #             # print(usr_class.hstry[-1].time-each_history.time)
-        #     # messagebox.showwarning(message='未查询到此书记录!')
-        # else:
-        #     messagebox.showwarning(message='请先借书!')
+
     def dis_list(self, usr_class):
-        messagebox.showinfo(message='您的已借阅书籍为\n        %s'%'\n        '.join(usr_class.b_book))
+        if len(usr_class.b_book) == 0:
+            messagebox.showinfo(message='还没有借书哦')
+        else:
+            messagebox.showinfo(message='您的已借阅书籍为\n        %s'%'\n        '.join(usr_class.b_book))
     def dis_hstry(self, usr_class):
-        messagebox.showinfo(message='您的已借阅书籍为\n%s' % '\n'.join(usr_class.hstry))
+        if len(usr_class.b_book) == 0:
+            messagebox.showinfo(message='未查询到借阅记录')
+        else:
+            messagebox.showinfo(message='您的已借阅记录为\n%s' % '\n'.join(usr_class.hstry))
+
 #     def __init__(self, parent, usr_name='null'):
 #         parent.destroy()
 #         self.usr_name = usr_name
@@ -367,7 +400,6 @@ class admin_page(main_page):
         add_page = book_details('书籍详情添加')
         self.main.wait_window(add_page.details)
         self.book_list.insert('', 'end', values=(add_page.book_info))
-        add_page.details.destroy()
 
     def edit_book(self):
         edit_page = book_details('书籍详情编辑')
@@ -394,9 +426,9 @@ class book_details():
         # self.details.geometry('400x300')
 
         self.msg = tk.Label(self.details, text='').grid(row=0)
-        self.name_ = tk.Label(self.details, text='书籍名称:').grid(row=1, column=0, padx=25, pady=5)
+        self.name_ = tk.Label(self.details, text='书籍名称:').grid(row=1, column=0, padx=20, pady=5)
         self.name = tk.Entry(self.details)
-        self.name.grid(row=1, column=1)
+        self.name.grid(row=1, column=1, padx=20)
         self.id_ = tk.Label(self.details, text='索书号:').grid(row=2, column=0, pady=5)
         self.id = tk.Entry(self.details)
         self.id.grid(row=2, column=1)
@@ -417,9 +449,13 @@ class book_details():
         self.submit.grid(row=7, column=0, sticky='e', pady=20)
         self.cancel = tk.Button(self.details, text='取消', command=lambda: self.back())
         self.cancel.grid(row=7, column=1, pady=20)
+        # self.submit = tk.Button(self.details, text='确认', command=lambda: self.edit_submit())
+        # self.submit.grid(row=7, column=0, sticky='e', pady=20)
+        # self.cancel = tk.Button(self.details, text='取消', command=lambda: self.back())
+        # self.cancel.grid(row=7, column=1, pady=20)
 
-        self.hsty = tk.Label(self.details, text='这里是借阅历史')
-        self.hsty.grid(row=0, column=2, padx=20, pady=5)
+        # self.hsty = tk.Label(self.details, text='这里是借阅历史')
+        # self.hsty.grid(row=0, column=2, padx=20, pady=5)
         # self.details.mainloop()
 
     def edit_submit(self):
@@ -428,6 +464,7 @@ class book_details():
                           self.all.get(), self.ath.get(), self.addr.get()]
         if len(self.book_info) == 0:
             messagebox.showwarning(title='警告', message='请输入要修改的内容')
+        self.details.destroy()
         # 这里不知道为啥蹦不出来?
 
     def back(self):
@@ -495,6 +532,9 @@ if __name__ == '__main__':
     #
 
 '''
+20-3-28 更新
+目标
+    可借数量不得大于总共 用户登录检查 搜索实时刷新 可借数量还有些微妙的bug
 20-3-27 更新
 基本完成GUI界面,放弃多文件编译
 目前实现功能

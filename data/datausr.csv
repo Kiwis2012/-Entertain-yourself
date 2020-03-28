@@ -1,0 +1,30 @@
+user id,user name,user type,history
+0,admin,admin,NULL
+1,reader,reader,1
+053,reader_rjs,reader,
+284,reader_HMC,reader,
+104,admin_lMJ,admin,
+725,reader_PNZ,reader,
+534,admin_kiR,admin,
+190,admin_foy,admin,
+147,admin_Hsp,admin,
+536,reader_DUs,reader,
+406,admin_tRl,admin,
+391,admin_TRq,admin,
+920,reader_Dhb,reader,
+658,reader_SHN,reader,
+406,reader_xfV,reader,
+896,reader_sTP,reader,
+529,admin_kpu,admin,
+691,admin_MaW,admin,
+584,reader_Saj,reader,
+728,reader_Quq,reader,
+528,admin_oav,admin,
+571,admin_glI,admin,
+1,reader,Reader,,****借入中华人民共和国公共图书馆法学习问答 编号:D922.165/5287 操作时间:Fri Mar 27 23:25:23 2020****归还中华人民共和国公共图书馆法学习问答 编号:D922.165/5287 操作时间:Fri Mar 27 23:25:23 2020
+1,reader,Reader,****借入实用机械计算手册 编号:TH123-62/2748(2) 操作时间:Fri Mar 27 23:26:27 2020****借入现代图书馆学研究概论 编号:G250/0000 操作时间:Fri Mar 27 23:26:37 2020****归还现代图书馆学研究概论 编号:G250/0000 操作时间:Fri Mar 27 23:26:39 2020****借入基于云计算的数字图书馆信息共享管理 编号:G250.76/4030 操作时间:Fri Mar 27 23:26:46 2020****归还基于云计算的数字图书馆信息共享管理 编号:G250.76/4030 操作时间:Fri Mar 27 23:26:46 2020****借入秘密图书馆 编号:G256.1-49/2427 操作时间:Fri Mar 27 23:26:52 2020,实用机械计算手册秘密图书馆
+23,test,Reader,,
+23,test,Reader,,
+23,test,Reader,****借入化学 编号:O6/3714(3) 操作时间:Sat Mar 28 15:52:35 2020****借入统计热物理学之基础 编号::2 操作时间:Sat Mar 28 15:52:40 2020****借入简单原子实验 编号:O571.1/2244(2) 操作时间:Sat Mar 28 15:52:59 2020****借入简单原子实验 编号:O571.1/2244(2) 操作时间:Sat Mar 28 15:53:00 2020****借入简单原子实验 编号:O571.1/2244(2) 操作时间:Sat Mar 28 15:53:00 2020****归还简单原子实验 编号:O571.1/2244(2) 操作时间:Sat Mar 28 15:53:03 2020****归还简单原子实验 编号:O571.1/2244(2) 操作时间:Sat Mar 28 15:53:03 2020****归还简单原子实验 编号:O571.1/2244(2) 操作时间:Sat Mar 28 15:53:04 2020,化学统计热物理学之基础
+0,admin,Admin
+1,reader,Reader,,
