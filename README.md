@@ -1,10 +1,12 @@
-# ForAdvancedProgramDesign
-Another course now...
+# Class IntelligentInformationProcessing
+Another again... implements of three ways to classificate the audios provided by teacher, including dense net, cnn, svm. (Keras)
+
+# Class AdvancedProgramDesign
+Another course... a system of library management
 
 `lib_manage.py`
 
-# ForPatternRecognition
-Assignments for class PatternRecognition in SEP2019
+# Class PatternRecognition
 
 `whale.py`
 
