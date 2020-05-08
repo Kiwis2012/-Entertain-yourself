@@ -1,8 +1,19 @@
-# Class IntelligentInformationProcessing
-Another again... implements of three ways to classificate the audios provided by teacher, including dense net, cnn, svm. (Keras)
+# Class InfoProc
+Another again in 2020 May... implements of three ways to classificate the audios provided by teacher, including dense net, cnn, svm. (Keras). 
+The accuracy of raw data and augmented data is:
+    | RAW | Dense Net  | CNN Net  |
+|  ----  | ----  |  ----  |
+| SGD  | 68.85% | 80.33% |
+| Adam | 75.41% | 81.97%|
+
+
+| AUG | Dense Net  | CNN Net  |
+|  ----  | ----  |  ----  |
+| SGD  | 81.97% | 86.89% |
+| Adam | 78.69% | 88.52%|
 
 # Class AdvancedProgramDesign
-Another course... a system of library management
+Another course in 2020 Jan... a system of library management, the teacher said it`s too simple for a complete system.
 
 `lib_manage.py`
 
@@ -22,3 +33,4 @@ generate some points and classificate them by linear and nonlinear SVM
 Homework for class, including Dichotomous methods, Fibonacci methods, Newton and Gradient Descent 
 methods to find the minimum value of the function, also really bad but still works
 
+``
